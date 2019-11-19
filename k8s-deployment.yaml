@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-test-server-deployment
+  labels:
+    app: kafka-test-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kafka-test-server
+  template:
+    metadata:
+      labels:
+        app: kafka-test-server
+
+    spec:
+      containers:
+        - name: kafka-test-server
+          image: mniyonshuti/kafka-test-server:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: KEY1
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-test-server-config
+                  key: someKey1
+            - name: NEXT_SERVICE
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-test-server-config
+                  key: nextService
+            - name: SERVICE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: kafka-test-server-secrets
+                  key: service-api-key
+            #MYSQL
+            - name: MYSQL_HOST
+              value: kafka-test-server-db
+
+            - name: MYSQL_USER
+              value: root
+            - name: MYSQL_PORT
+              value: "8081"
+
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: kafka-test-server-secrets
+                  key: mysql-root-password
